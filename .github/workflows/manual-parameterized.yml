@@ -43,5 +43,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: final execution summary message
-        run: echo 'Conditionally executed second job'
+        run: echo 'successful workflow_dispatch'
 
