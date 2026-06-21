@@ -1,0 +1,46 @@
+name: workflow_dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+
+      application_name:
+        type: string
+        required: true
+
+      run_validation:
+        type: boolean
+        required: true
+
+jobs:
+
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      validation_status: ${{ steps.determine_status.outputs.validation_status }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: reads and prints the runtime inputs
+        run: |
+          echo "Application: ${{ github.event.inputs.application_name }}"
+          echo "Run Validation: ${{ github.event.inputs.run_validation }}"
+
+      - name: validation
+        id: determine_status
+        run: |
+          if [ "${{ github.event.inputs.run_validation }}" = "true" ]; then
+            echo "validation_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "validation_status=skipped" >> $GITHUB_OUTPUT
+          fi
+  
+  summary:
+    needs: validate
+    if: ${{ needs.validate.outputs.validation_status == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: final execution summary message
+        run: echo 'Conditionally executed second job'
+
